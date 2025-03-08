@@ -28,7 +28,10 @@ namespace ScannerAPIProject
                         result = services.ScanAndSaveAllControllersAndApis(rootPath);
 
                         if (result)
+                        {
                             services.SaveChanges();
+                            Console.WriteLine("Successfully operation.");
+                        }
                     }
                     catch(Exception ex)
                     {

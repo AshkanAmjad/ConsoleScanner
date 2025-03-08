@@ -11,7 +11,7 @@ using ScannerAPIProject.Context;
 namespace ScannerAPIProject.Migrations
 {
     [DbContext(typeof(ScannerAPIContext))]
-    [Migration("20250307141515_CreateDB")]
+    [Migration("20250308050426_CreateDB")]
     partial class CreateDB
     {
         /// <inheritdoc />
