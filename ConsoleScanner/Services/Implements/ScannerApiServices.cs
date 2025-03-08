@@ -1,30 +1,28 @@
-﻿using System.Diagnostics.Contracts;
-using System.Text.RegularExpressions;
-using Microsoft.EntityFrameworkCore;
-using ScannerAPIProject.Context;
+﻿using System.Text.RegularExpressions;
 using ScannerAPIProject.Models;
-using ScannerAPIProject.Models.Entities;
 using ScannerAPIProject.Services.Interfaces;
 
 namespace ScannerAPIProject.Services.Implements
 {
-    public class ScannerApiServices:IScannerApiServices
+    public class ScannerApiServices : IScannerApiServices
     {
-        private readonly ScannerAPIContext _context;
+        private readonly TotalSchoolContext _context;
 
         public ScannerApiServices()
         {
-            _context = new ScannerAPIContext();
+            _context = new TotalSchoolContext();
         }
 
         public bool ScanAndSaveAllControllersAndApis(string rootPath)
         {
-            var result = false;            if (!Directory.Exists(rootPath))
+            var result = false;
+
+            if (!Directory.Exists(rootPath))
             {
                 Console.WriteLine($"Not Found => {rootPath}");
                 return result;
             }
-            HashSet<MenuPageApi> menuPageApi = new();
+            HashSet<MenuPageApi3> menuPageApi = new();
 
             var jsFiles = Directory.GetFiles(rootPath, "*controller.js", SearchOption.AllDirectories);
 
@@ -32,21 +30,23 @@ namespace ScannerAPIProject.Services.Implements
             {
                 string fileContent = File.ReadAllText(jsFile);
                 string controllerName = Path.GetFileNameWithoutExtension(jsFile);
-                string folderPath = Path.GetDirectoryName(jsFile);
-                string folderName = new DirectoryInfo(folderPath).Name;
 
-                var existingPage = _context.MenuPages.Where(p => p.ControllerName == controllerName && p.FolderName == folderName)
+                if (controllerName.EndsWith("Controller"))
+                {
+                    controllerName = controllerName.Substring(0, controllerName.Length - "Controller".Length);
+                }
+
+                var existingPage = _context.MenuPage3.Where(p => p.ControllerName == controllerName)
                                                      .FirstOrDefault();
 
                 if (existingPage == null)
                 {
-                    existingPage = new MenuPage
+                    existingPage = new MenuPage3
                     {
-                        FolderName = folderName,
                         ControllerName = controllerName
                     };
-                    _context.MenuPages.Add(existingPage);
-                    _context.SaveChanges();
+                    //_context.MenuPage3.Add(existingPage);
+                    //SaveChanges();
                 }
 
                 var apiUrls = ExtractApiEndpoints(fileContent);
@@ -54,14 +54,13 @@ namespace ScannerAPIProject.Services.Implements
                 var popUps = ExtractPopupEndpoints(fileContent);
                 apiUrls.AddRange(popUps);
 
-
                 if (apiUrls.Count > 0)
                 {
                     foreach (var api in apiUrls)
                     {
                         string redirectUrl = redirects.FirstOrDefault() ?? string.Empty; // اگر مقدار ریدایرکت یافت نشد، از رشته خالی استفاده کن
 
-                        menuPageApi.Add(new MenuPageApi
+                        menuPageApi.Add(new MenuPageApi3
                         {
                             ApiUrl = api,
                             RedirectUrl = redirectUrl,
@@ -74,7 +73,9 @@ namespace ScannerAPIProject.Services.Implements
 
             if (menuPageApi.Count > 0)
             {
-                _context.MenuPageApis.AddRange(menuPageApi);
+                //_context.MenuPageApi3.AddRange(menuPageApi);
+                //SaveChanges();
+                MappingMenuPages();
                 result = true;
             }
 
@@ -215,8 +216,31 @@ namespace ScannerAPIProject.Services.Implements
             return apiUrls;
         }
 
+        public void MappingMenuPages()
+        {
+            var mappings = (from menuPage in _context.MenuPages
+                            join menuPage_3 in _context.MenuPage3
+                            on menuPage.State equals menuPage_3.ControllerName
+                            join menuPageApi_3 in _context.MenuPageApi3
+                            on menuPage_3.MenuPageId equals menuPageApi_3.MemuPageApiId
+                            select new MenuPageMapping
+                            {
+                                MenuPageId = menuPage_3.MenuPageId,
+                                Title = menuPage_3.ControllerName,
+                                SidaMenupageId = menuPage.Id
+                            }).ToList();
+
+
+            if (mappings != null)
+            {
+                _context.MenuPageMappings.AddRange(mappings);
+                SaveChanges();
+            }
+        }
+
+
         public void SaveChanges()
-            =>_context.SaveChanges();
+            => _context.SaveChanges();
     }
 }
 

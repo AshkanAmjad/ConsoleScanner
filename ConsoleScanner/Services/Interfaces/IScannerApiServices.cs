@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScannerAPIProject.Services.Interfaces
+﻿namespace ScannerAPIProject.Services.Interfaces
 {
     public interface IScannerApiServices
     {
@@ -13,6 +7,7 @@ namespace ScannerAPIProject.Services.Interfaces
         List<string> ExtractPopupEndpoints(string fileContent);
         List<string> ExtractRedirects(string fileContent);
         List<string> ExtractApiFromDirectives(List<string> directives);
+        void MappingMenuPages();
         void SaveChanges();
     }
 }

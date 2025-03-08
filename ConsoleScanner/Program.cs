@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using ScannerAPIProject.Context;
-using ScannerAPIProject.Services;
 using ScannerAPIProject.Services.Implements;
 using ScannerAPIProject.Services.Interfaces;
 
@@ -12,7 +8,7 @@ namespace ScannerAPIProject
         static void Main(string[] args)
         {
             while (true)
-            {                
+            {
                 bool result = false;
                 Console.WriteLine("1. Automatic Scan");
                 Console.WriteLine("2. Exit");
@@ -29,11 +25,10 @@ namespace ScannerAPIProject
 
                         if (result)
                         {
-                            services.SaveChanges();
                             Console.WriteLine("Successfully operation.");
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
                     }
