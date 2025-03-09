@@ -7,6 +7,7 @@ namespace ScannerAPIProject
     {
         static void Main(string[] args)
         {
+
             while (true)
             {
                 bool result = false;

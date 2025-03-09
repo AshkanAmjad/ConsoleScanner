@@ -218,17 +218,30 @@ namespace ScannerAPIProject.Services.Implements
 
         public void MappingMenuPages()
         {
+            //var mappings = (from menuPage in _context.MenuPages
+            //                join menuPage_3 in _context.MenuPage3
+            //                on menuPage.State equals menuPage_3.ControllerName
+            //                join menuPageApi_3 in _context.MenuPageApi3
+            //                on menuPage_3.MenuPageId equals menuPageApi_3.MemuPageApiId
+            //                select new MenuPageMapping
+            //                {
+            //                    MenuPageId = menuPage_3.MenuPageId,
+            //                    Title = menuPage_3.ControllerName,
+            //                    SidaMenupageId = menuPage.Id
+            //                }).ToList();
+
+
             var mappings = (from menuPage in _context.MenuPages
-                            join menuPage_3 in _context.MenuPage3
-                            on menuPage.State equals menuPage_3.ControllerName
-                            join menuPageApi_3 in _context.MenuPageApi3
-                            on menuPage_3.MenuPageId equals menuPageApi_3.MemuPageApiId
-                            select new MenuPageMapping
-                            {
-                                MenuPageId = menuPage_3.MenuPageId,
-                                Title = menuPage_3.ControllerName,
-                                SidaMenupageId = menuPage.Id
-                            }).ToList();
+                           join menuPage_3 in _context.MenuPage3
+                           on menuPage.State equals menuPage_3.ControllerName
+                           into menuPageGroup
+                           from menuPageJoin in menuPageGroup.DefaultIfEmpty()
+                           select new MenuPageMapping
+                           {
+                               MenuPageId = menuPageJoin.MenuPageId!=null && menuPageJoin.MenuPageId != 0 ? menuPageJoin.MenuPageId :0,
+                               Title = menuPage.State!=null? menuPage.State :"",
+                               SidaMenupageId = menuPage.Id
+                           }).ToList();
 
 
             if (mappings != null)
