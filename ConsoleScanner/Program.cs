@@ -10,7 +10,6 @@ namespace ScannerAPIProject
 
             while (true)
             {
-                bool result = false;
                 Console.WriteLine("1. Automatic Scan");
                 Console.WriteLine("2. Exit");
                 Console.Write("Choose: ");
@@ -21,6 +20,7 @@ namespace ScannerAPIProject
                     try
                     {
                         var message = "";
+                        bool result = false;
                         IScannerApiServices services = new ScannerApiServices();
                         string rootPath = @"C:\Users\reza.o\source\repos\sida-cross-platform2\Pajoohesh.School.Web\wwwroot\Sida\App\views";
                         result = services.ScanAndSaveAllControllersAndApis(out message, rootPath);
