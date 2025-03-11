@@ -13,13 +13,15 @@ namespace ScannerAPIProject.Services.Implements
             _context = new TotalSchoolContext();
         }
 
-        public bool ScanAndSaveAllControllersAndApis(string rootPath)
+        public bool ScanAndSaveAllControllersAndApis(out string message, string rootPath)
         {
             var result = false;
+            string checkMessage;
 
             if (!Directory.Exists(rootPath))
             {
-                Console.WriteLine($"Not Found => {rootPath}");
+                checkMessage = $"Error : Not Found => {rootPath}";
+                message = checkMessage;
                 return result;
             }
             HashSet<MenuPageApi3> menuPageApi = new();
@@ -39,15 +41,15 @@ namespace ScannerAPIProject.Services.Implements
                 var existingPage = _context.MenuPage3.Where(p => p.ControllerName == controllerName)
                                                      .FirstOrDefault();
 
-                if (existingPage == null)
-                {
-                    existingPage = new MenuPage3
-                    {
-                        ControllerName = controllerName
-                    };
-                    //_context.MenuPage3.Add(existingPage);
-                    //SaveChanges();
-                }
+                //if (existingPage == null)
+                //{
+                //    existingPage = new MenuPage3
+                //    {
+                //        ControllerName = controllerName
+                //    };
+                //      _context.MenuPage3.Add(existingPage);
+                //      SaveChanges();
+                //}
 
                 var apiUrls = ExtractApiEndpoints(fileContent);
                 var redirects = ExtractRedirects(fileContent);
@@ -56,17 +58,27 @@ namespace ScannerAPIProject.Services.Implements
 
                 if (apiUrls.Count > 0)
                 {
+                    var mappings = GetMappingsQuery();
+
                     foreach (var api in apiUrls)
                     {
-                        string redirectUrl = redirects.FirstOrDefault() ?? string.Empty; // اگر مقدار ریدایرکت یافت نشد، از رشته خالی استفاده کن
+                        string redirectUrl = redirects.FirstOrDefault() ?? string.Empty;
+
+                        var sidaMenuPage = mappings.Where(menu => menu.MenuPageId == existingPage.MenuPageId)
+                                                   .Select(menu => new
+                                                   {
+                                                       menu.SidaMenupageId,
+                                                       menu.Title
+                                                   })
+                                                   .FirstOrDefault();
 
                         menuPageApi.Add(new MenuPageApi3
                         {
                             ApiUrl = api,
                             RedirectUrl = redirectUrl,
-                            MenuPageId = existingPage.MenuPageId
+                            SidaMenuPageId = sidaMenuPage.SidaMenupageId,
+                            State = sidaMenuPage.Title
                         });
-
                     }
                 }
             }
@@ -75,10 +87,14 @@ namespace ScannerAPIProject.Services.Implements
             {
                 //_context.MenuPageApi3.AddRange(menuPageApi);
                 //SaveChanges();
-                MappingMenuPages();
+                //MappingMenuPages();
+
+                checkMessage = "Successfully operation.";
+                message = checkMessage;
                 result = true;
             }
-
+            checkMessage = "Unsuccessfully operation.";
+            message = checkMessage;
             return result;
         }
 
@@ -232,16 +248,16 @@ namespace ScannerAPIProject.Services.Implements
 
 
             var mappings = (from menuPage in _context.MenuPages
-                           join menuPage_3 in _context.MenuPage3
-                           on menuPage.State equals menuPage_3.ControllerName
-                           into menuPageGroup
-                           from menuPageJoin in menuPageGroup.DefaultIfEmpty()
-                           select new MenuPageMapping
-                           {
-                               MenuPageId = menuPageJoin.MenuPageId!=null && menuPageJoin.MenuPageId != 0 ? menuPageJoin.MenuPageId :0,
-                               Title = menuPage.State!=null? menuPage.State :"",
-                               SidaMenupageId = menuPage.Id
-                           }).ToList();
+                            join menuPage_3 in _context.MenuPage3
+                            on menuPage.State equals menuPage_3.ControllerName
+                            into menuPageGroup
+                            from menuPageJoin in menuPageGroup.DefaultIfEmpty()
+                            select new MenuPageMapping
+                            {
+                                MenuPageId = menuPageJoin.MenuPageId != null && menuPageJoin.MenuPageId != 0 ? menuPageJoin.MenuPageId : 0,
+                                Title = menuPage.State != null ? menuPage.State : "",
+                                SidaMenupageId = menuPage.Id
+                            }).ToList();
 
 
             if (mappings != null)
@@ -254,6 +270,9 @@ namespace ScannerAPIProject.Services.Implements
 
         public void SaveChanges()
             => _context.SaveChanges();
+
+        public IQueryable<MenuPageMapping> GetMappingsQuery()
+         => _context.MenuPageMappings.AsQueryable();
     }
 }
 

@@ -20,14 +20,12 @@ namespace ScannerAPIProject
                 {
                     try
                     {
+                        var message = "";
                         IScannerApiServices services = new ScannerApiServices();
                         string rootPath = @"C:\Users\reza.o\source\repos\sida-cross-platform2\Pajoohesh.School.Web\wwwroot\Sida\App\views";
-                        result = services.ScanAndSaveAllControllersAndApis(rootPath);
+                        result = services.ScanAndSaveAllControllersAndApis(out message, rootPath);
+                        Console.WriteLine(message);
 
-                        if (result)
-                        {
-                            Console.WriteLine("Successfully operation.");
-                        }
                     }
                     catch (Exception ex)
                     {
