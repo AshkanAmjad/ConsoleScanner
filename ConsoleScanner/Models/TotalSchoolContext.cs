@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScannerAPIProject.Models;
 
@@ -13,13 +15,13 @@ public partial class TotalSchoolContext : DbContext
     {
     }
 
-    public virtual DbSet<MenuPage> MenuPages { get; set; }
+    public virtual DbSet<MenuPage> MenuPage { get; set; }
 
     public virtual DbSet<MenuPage3> MenuPage3 { get; set; }
 
     public virtual DbSet<MenuPageApi3> MenuPageApi3 { get; set; }
 
-    public virtual DbSet<MenuPageMapping> MenuPageMappings { get; set; }
+    public virtual DbSet<MenuPageMapping> MenuPageMapping { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.

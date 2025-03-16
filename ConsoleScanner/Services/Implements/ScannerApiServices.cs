@@ -17,6 +17,7 @@ namespace ScannerAPIProject.Services.Implements
         {
             var result = false;
             string checkMessage;
+            checkMessage = "Unsuccessfully operation.";
 
             if (!Directory.Exists(rootPath))
             {
@@ -47,8 +48,8 @@ namespace ScannerAPIProject.Services.Implements
                 //    {
                 //        ControllerName = controllerName
                 //    };
-                //      _context.MenuPage3.Add(existingPage);
-                //      SaveChanges();
+                //    _context.MenuPage3.Add(existingPage);
+                //    SaveChanges();
                 //}
 
                 var apiUrls = ExtractApiEndpoints(fileContent);
@@ -58,42 +59,52 @@ namespace ScannerAPIProject.Services.Implements
 
                 if (apiUrls.Count > 0)
                 {
-                    var mappings = GetMappingsQuery();
+                    var mappings = GetMappingsQuery().ToList();
+
+                    var redirectUrl = redirects.FirstOrDefault() ?? string.Empty;
+                    var mappingDictionary = new Dictionary<int, int?>();
+
+                    foreach (var menu in mappings)
+                    {
+                        if (!mappingDictionary.ContainsKey(menu.MenuPageId))
+                        {
+                            mappingDictionary.Add(menu.MenuPageId, menu.SidaMenupageId);
+                        }
+                    }
 
                     foreach (var api in apiUrls)
                     {
-                        string redirectUrl = redirects.FirstOrDefault() ?? string.Empty;
+                        if (existingPage == null)
+                        {
+                            continue;
+                        }
 
-                        var sidaMenuPage = mappings.Where(menu => menu.MenuPageId == existingPage.MenuPageId)
-                                                   .Select(menu => new
-                                                   {
-                                                       menu.SidaMenupageId,
-                                                       menu.Title
-                                                   })
-                                                   .FirstOrDefault();
+                        mappingDictionary.TryGetValue(existingPage.MenuPageId, out var sidaMenuPageId);
 
                         menuPageApi.Add(new MenuPageApi3
                         {
                             ApiUrl = api,
                             RedirectUrl = redirectUrl,
-                            SidaMenuPageId = sidaMenuPage.SidaMenupageId,
-                            State = sidaMenuPage.Title
+                            MenuPageId = existingPage.MenuPageId,
+                            SidaMenuPageId = sidaMenuPageId != 0 && sidaMenuPageId != null ? sidaMenuPageId : 0,
                         });
                     }
+
                 }
             }
 
+            //MappingMenuPages();
+
             if (menuPageApi.Count > 0)
             {
-                //_context.MenuPageApi3.AddRange(menuPageApi);
-                //SaveChanges();
-                //MappingMenuPages();
+                _context.MenuPageApi3.AddRange(menuPageApi);
+
+                SaveChanges();
 
                 checkMessage = "Successfully operation.";
                 message = checkMessage;
                 result = true;
             }
-            checkMessage = "Unsuccessfully operation.";
             message = checkMessage;
             return result;
         }
@@ -247,7 +258,7 @@ namespace ScannerAPIProject.Services.Implements
             //                }).ToList();
 
 
-            var mappings = (from menuPage in _context.MenuPages
+            var mappings = (from menuPage in _context.MenuPage
                             join menuPage_3 in _context.MenuPage3
                             on menuPage.State equals menuPage_3.ControllerName
                             into menuPageGroup
@@ -262,17 +273,19 @@ namespace ScannerAPIProject.Services.Implements
 
             if (mappings != null)
             {
-                _context.MenuPageMappings.AddRange(mappings);
+                _context.MenuPageMapping.AddRange(mappings);
                 SaveChanges();
             }
         }
 
 
         public void SaveChanges()
-            => _context.SaveChanges();
+        => _context.SaveChanges();
 
         public IQueryable<MenuPageMapping> GetMappingsQuery()
-         => _context.MenuPageMappings.AsQueryable();
+         => _context.MenuPageMapping.AsQueryable();
+
+
     }
 }
 

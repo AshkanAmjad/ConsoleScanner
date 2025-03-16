@@ -1,4 +1,7 @@
-﻿namespace ScannerAPIProject.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ScannerAPIProject.Models;
 
 public partial class MenuPageMapping
 {
@@ -8,5 +11,5 @@ public partial class MenuPageMapping
 
     public int MenuPageId { get; set; }
 
-    public int SidaMenupageId { get; set; }
+    public int? SidaMenupageId { get; set; }
 }

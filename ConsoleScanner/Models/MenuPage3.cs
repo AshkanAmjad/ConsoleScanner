@@ -1,4 +1,7 @@
-﻿namespace ScannerAPIProject.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ScannerAPIProject.Models;
 
 public partial class MenuPage3
 {
